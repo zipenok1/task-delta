@@ -1,10 +1,11 @@
 import avatar from '../img/avatar.jpg';
 import message from '../img/mail.svg';
 import call from '../img/phone.svg';
+import header from '../img/header.jpg';
 
 function Header() {
     return (
-        <div className="w-full h-48 bg-cover bg-center bg-[url(/home/prog/Desktop/task-delta/src/img/header.jpg)]">
+        <div className="w-full h-48 bg-cover bg-center relative" style={{ backgroundImage: `url(${header})` }}>
             <div className='flex justify-between items-end px-8 pt-38 max-w-5xl mx-auto my-0'>
                 <div className='flex gap-5 items-end'>
                     <img 

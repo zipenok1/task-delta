@@ -1,28 +1,42 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { createPortal } from "react-dom"
 import { getDetals, postPhoto } from '../api/photoServise'
 
 function Modal({ isOpen, onClose, id }) {
-    const [data, setData] = useState({ comments: [] })
+    const [data, setData] = useState({comments: []})
     const [comment, setComment] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const cacheRef = useRef({})
 
     useEffect(() => {
+        if (!id) return;
+
+        if (cacheRef.current[id]) {
+            setData(cacheRef.current[id]);
+            return; 
+        }
         const getDetal = async () => {
-            if (id) {
             setIsLoading(true)
             try {
                 const response = await getDetals(id)
-                setData(response || { comments: [] })
+                setData({ 
+                    ...response, 
+                    comments: response.comments || [] 
+                });
+                cacheRef.current[id] = { 
+                    ...response, 
+                    comments: response.comments || [] 
+                };
             } catch (error) {
                 console.error("Error fetching details:", error)
                 setData({ comments: [] })
             } finally {
                 setIsLoading(false)
-            }}
+            }
         }
         getDetal()
     }, [id])
+    
 
     const submit = async (e) => {
         e.preventDefault()
