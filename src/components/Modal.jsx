@@ -92,7 +92,7 @@ function Modal({ isOpen, onClose, id }) {
                         <>
                             <div className="p-6 pb-4">
                                 <img 
-                                    className="w-full h-auto rounded-lg shadow-md max-h-96 object-contain"
+                                    className="w-full h-auto max-h-92 object-contain"
                                     src={data.largeImage} 
                                     alt="Large view" 
                                 />
