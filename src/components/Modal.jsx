@@ -7,16 +7,22 @@ function Modal({ isOpen, onClose, id }) {
     const [comment, setComment] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const cacheRef = useRef({})
+    const abortControllerRef = useRef(null)
 
     useEffect(() => {
-        if (!id) return;
-
+        if (!id || !isOpen) return;
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
         if (cacheRef.current[id]) {
             setData(cacheRef.current[id]);
             return; 
         }
+
         const getDetal = async () => {
             setIsLoading(true)
+            abortControllerRef.current = new AbortController();
+            
             try {
                 const response = await getDetals(id)
                 setData({ 
@@ -28,14 +34,24 @@ function Modal({ isOpen, onClose, id }) {
                     comments: response.comments || [] 
                 };
             } catch (error) {
-                console.error("Error fetching details:", error)
-                setData({ comments: [] })
+                if (error.name !== 'AbortError') {
+                    console.error("Error fetching details:", error)
+                    setData({ comments: [] })
+                }
             } finally {
                 setIsLoading(false)
             }
         }
-        getDetal()
-    }, [id])
+
+        const timeoutId = setTimeout(getDetal, 100);
+        
+        return () => {
+            clearTimeout(timeoutId);
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, [id, isOpen])
     
 
     const submit = async (e) => {
@@ -45,8 +61,10 @@ function Modal({ isOpen, onClose, id }) {
         try {
             await postPhoto({ comment }, id)
             setComment('')
+            delete cacheRef.current[id];
             const updatedData = await getDetals(id)
             setData(updatedData || { comments: [] })
+            cacheRef.current[id] = updatedData;
         } catch (error) {
             console.error("Error posting comment:", error)
         } finally {

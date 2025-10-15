@@ -6,16 +6,14 @@ const api = axios.create({
 
 api.interceptors.response.use(
   res => res,
-  err => {
+  async err => {
     if (err.response?.status === 429) {
-      return new Promise(resolve => {
-        setTimeout(() => resolve(api(err.config)), 1000) // повтор через 1 сек
-      })
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      return api.request(err.config)
     }
-    return Promise.reject(err)
+    return Promise.reject(err);
   }
-)
-
+);
 export const getPhoto = async () => {
     return (await api.get('images')).data
 }
